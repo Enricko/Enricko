@@ -1,5 +1,5 @@
 <h1 align="center">Hi 👋, I'm Enricko Putra Hartono</h1>
-<h3 align="center">A Passionate Fullstack Developer From Indonesia Google 🇮🇩</h3>
+<h3 align="center">A Passionate Fullstack Developer From Indonesia 🇮🇩</h3>
 
 <p align="left"> <img src="https://komarev.com/ghpvc/?username=enricko&label=Profile%20views&color=0e75b6&style=flat" alt="enricko" /> </p>
 
