@@ -1,7 +1,6 @@
 <h1 align="center">Hi 👋, I'm Enricko Putra Hartono</h1>
 <h3 align="center">A passionate FullStack Software Engineer from Indonesia</h3>
 
----
 [![](https://visitcount.itsvg.in/api?id=Enricko&icon=5&color=0)](https://visitcount.itsvg.in)
 
 # 💫About Me :
@@ -40,6 +39,7 @@
 ### 😂Random Dev Meme
 <img src="https://random-memer.herokuapp.com/" width="512px"/>
 
+---
   ## 💰You can help me by Donating
   [![BuyMeACoffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-ffdd00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black)](https://buymeacoffee.com/enrickoputw) 
 
