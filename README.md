@@ -14,7 +14,7 @@
 
 - 💬 Ask me about **Anything that i could possible do**
 
-- 📫 How to reach me **enricko.putra028@gmail.com**
+- 📫 How to reach me **Enricko.putra028@gmail.com**
 
 - 📄 Know about my experiences [https://enricko.site](https://enricko.site)
 
