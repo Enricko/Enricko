@@ -6,7 +6,7 @@
 # 💫About Me :
 - 🔭 I’m currently working on [Binav Avts Vessel](https://binav-avts)
 
-- 🌱 I’m currently learning **Python,Dart,Flutter,Unity,C#,Flask,and Flask Rest-X**
+- 🌱 I’m currently learning **Python, Dart, Flutter, Unity, C#, Flask, Flask Rest-X, Golang ,and Golang Gin**
 
 - 👨‍💻 All of my projects are available at [https://enricko.site](https://enricko.site)
 
