@@ -18,6 +18,7 @@
 
 - 📄 Know about my experiences [https://enricko.site](https://enricko.site)
 
+
 - ⚡ Fun fact **I think i'm friendly guy**
 
 ## 🌐Socials
