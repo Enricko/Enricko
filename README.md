@@ -18,8 +18,7 @@
 
 - 📄 Know about my experiences [https://enricko.site](https://enricko.site)
 
-
-- ⚡ Fun fact **I think i'm friendly guy**
+- ⚡ Fun fact **Friendly guy**
 
 ## 🌐Socials
 [![Facebook](https://img.shields.io/badge/Facebook-%231877F2.svg?logo=Facebook&logoColor=white)](https://facebook.com/enricko%20putra%20hartono) [![Instagram](https://img.shields.io/badge/Instagram-%23E4405F.svg?logo=Instagram&logoColor=white)](https://instagram.com/enricko_putra_h) [![LinkedIn](https://img.shields.io/badge/LinkedIn-%230077B5.svg?logo=linkedin&logoColor=white)](https://linkedin.com/in/enricko%20putra%20hartono) [![YouTube](https://img.shields.io/badge/YouTube-%23FF0000.svg?logo=YouTube&logoColor=white)](https://youtube.com/c/@ENRICKOPUTRAHARTONO) 
