@@ -16,7 +16,7 @@
 
 - 📫 How to reach me **Enricko.putra028@gmail.com**
 
-- 📄 Know about my experiences [https://enricko.site](https://enricko.site)
+- 📄 Know about my experiences [https://enricko-profile.vercel.app](https://enricko-profile.vercel.app)
 
 - ⚡ Fun fact **Friendly guy**
 
