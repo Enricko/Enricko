@@ -4,13 +4,13 @@
 [![](https://visitcount.itsvg.in/api?id=Enricko&label=Profile%20Views&pretty=true)](https://visitcount.itsvg.in)
 
 # 💫About Me :
-- 🔭 I’m currently working on [Binav Avts Vessel](https://binav-avts)
+- 🔭 I’m currently working on [Binav Avts Vessel](https://binav.co.id)
 
 - 🌱 I’m currently learning **Python, Dart, Flutter, Unity, C#, Flask, Flask Rest-X, Golang ,and Golang Gin**
 
-- 👨‍💻 All of my projects are available at [https://enricko.site](https://enricko.site)
+- 👨‍💻 All of my projects are available at [https://enricko-profile.vercel.app](https://enricko-profile.vercel.app)
 
-- 📝 I regularly write articles on [https://enricko.site](https://enricko.site)
+- 📝 I regularly write articles on [https://enricko-profile.vercel.app](https://enricko-profile.vercel.app)
 
 - 💬 Ask me about **Anything that i could possible do**
 
