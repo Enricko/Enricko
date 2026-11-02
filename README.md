@@ -1,47 +1,64 @@
-<h1 align="center">Hi 👋, I'm Enricko Putra Hartono</h1>
-<h3 align="center">A passionate FullStack Software Engineer from Indonesia</h3>
+<h1 align="center">Hi, I'm Enricko Putra Hartono 👋</h1>
 
-[![](https://visitcount.itsvg.in/api?id=Enricko&label=Profile%20Views&pretty=true)](https://visitcount.itsvg.in)
+<p align="center">
+  <b>Full-stack software engineer</b> from Yogyakarta, Indonesia<br/>
+  I build mobile apps, web apps and APIs with Flutter, Laravel, Go and React
+</p>
 
-# 💫About Me :
-- 🔭 I’m currently working on [Binav Avts Vessel](https://binav.co.id)
-
-- 🌱 I’m currently learning **Python, Dart, Flutter, Unity, C#, Flask, Flask Rest-X, Golang ,and Golang Gin**
-
-- 👨‍💻 All of my projects are available at [https://enricko-profile.vercel.app](https://enricko-profile.vercel.app)
-
-- 📝 I regularly write articles on [https://enricko-profile.vercel.app](https://enricko-profile.vercel.app)
-
-- 💬 Ask me about **Anything that i could possible do**
-
-- 📫 How to reach me **Enricko.putra028@gmail.com**
-
-- 📄 Know about my experiences [https://enricko-profile.vercel.app](https://enricko-profile.vercel.app)
-
-- ⚡ Fun fact **Friendly guy**
-
-## 🌐Socials
-[![Facebook](https://img.shields.io/badge/Facebook-%231877F2.svg?logo=Facebook&logoColor=white)](https://facebook.com/enricko%20putra%20hartono) [![Instagram](https://img.shields.io/badge/Instagram-%23E4405F.svg?logo=Instagram&logoColor=white)](https://instagram.com/enricko_putra_h) [![LinkedIn](https://img.shields.io/badge/LinkedIn-%230077B5.svg?logo=linkedin&logoColor=white)](https://linkedin.com/in/enricko%20putra%20hartono) [![YouTube](https://img.shields.io/badge/YouTube-%23FF0000.svg?logo=YouTube&logoColor=white)](https://youtube.com/c/@ENRICKOPUTRAHARTONO) 
-
-# 💻Tech Stack
-![C#](https://img.shields.io/badge/c%23-%23239120.svg?style=for-the-badge&logo=csharp&logoColor=white) ![C++](https://img.shields.io/badge/c++-%2300599C.svg?style=for-the-badge&logo=c%2B%2B&logoColor=white) ![HTML5](https://img.shields.io/badge/html5-%23E34F26.svg?style=for-the-badge&logo=html5&logoColor=white) ![CSS3](https://img.shields.io/badge/css3-%231572B6.svg?style=for-the-badge&logo=css3&logoColor=white) ![Dart](https://img.shields.io/badge/dart-%230175C2.svg?style=for-the-badge&logo=dart&logoColor=white) ![Go](https://img.shields.io/badge/go-%2300ADD8.svg?style=for-the-badge&logo=go&logoColor=white) ![JavaScript](https://img.shields.io/badge/javascript-%23323330.svg?style=for-the-badge&logo=javascript&logoColor=%23F7DF1E) ![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54) ![PHP](https://img.shields.io/badge/php-%23777BB4.svg?style=for-the-badge&logo=php&logoColor=white) ![AWS](https://img.shields.io/badge/AWS-%23FF9900.svg?style=for-the-badge&logo=amazon-aws&logoColor=white) ![Firebase](https://img.shields.io/badge/firebase-%23039BE5.svg?style=for-the-badge&logo=firebase) ![Flask](https://img.shields.io/badge/flask-%23000.svg?style=for-the-badge&logo=flask&logoColor=white) ![Flutter](https://img.shields.io/badge/Flutter-%2302569B.svg?style=for-the-badge&logo=Flutter&logoColor=white) ![Bootstrap](https://img.shields.io/badge/bootstrap-%238511FA.svg?style=for-the-badge&logo=bootstrap&logoColor=white) ![JWT](https://img.shields.io/badge/JWT-black?style=for-the-badge&logo=JSON%20web%20tokens) ![Laravel](https://img.shields.io/badge/laravel-%23FF2D20.svg?style=for-the-badge&logo=laravel&logoColor=white) ![Socket.io](https://img.shields.io/badge/Socket.io-black?style=for-the-badge&logo=socket.io&badgeColor=010101) ![Apache](https://img.shields.io/badge/apache-%23D42029.svg?style=for-the-badge&logo=apache&logoColor=white) ![MySQL](https://img.shields.io/badge/mysql-%2300000f.svg?style=for-the-badge&logo=mysql&logoColor=white) ![SQLite](https://img.shields.io/badge/sqlite-%2307405e.svg?style=for-the-badge&logo=sqlite&logoColor=white) ![Firebase](https://img.shields.io/badge/Firebase-039BE5?style=for-the-badge&logo=Firebase&logoColor=white) ![Figma](https://img.shields.io/badge/figma-%23F24E1E.svg?style=for-the-badge&logo=figma&logoColor=white) ![Canva](https://img.shields.io/badge/Canva-%2300C4CC.svg?style=for-the-badge&logo=Canva&logoColor=white)
-# 📊GitHub Stats :
-![](https://github-readme-stats.vercel.app/api?username=Enricko&theme=tokyonight&hide_border=false&include_all_commits=false&count_private=false)<br/>
-![](https://github-readme-streak-stats.herokuapp.com/?user=Enricko&theme=tokyonight&hide_border=false)<br/>
-![](https://github-readme-stats.vercel.app/api/top-langs/?username=Enricko&theme=tokyonight&hide_border=false&include_all_commits=false&count_private=false&layout=compact)
-
-
-## 🏆GitHub Trophies
-![](https://github-trophies.vercel.app/?username=Enricko&theme=radical&no-frame=false&no-bg=true&margin-w=4&rank=UNKNOWN,SECRET,SSS,SS,S,AAA,AA,A)
-
-### 🔝 Top Contributed Repo
-![](https://github-contributor-stats.vercel.app/api?username=enricko&limit=5&theme=radical&combine_all_yearly_contributions=true)
-
-### ✍️Random Dev Quote
-![](https://quotes-github-readme.vercel.app/api?type=horizontal&theme=merko)
+<p align="center">
+  <a href="https://enricko-profile.vercel.app"><img src="https://img.shields.io/badge/Portfolio-0A0A0A?style=flat&logo=vercel&logoColor=white" alt="Portfolio"/></a>
+  <a href="https://www.linkedin.com/in/enricko-putra-hartono-744646233/"><img src="https://img.shields.io/badge/LinkedIn-0A66C2?style=flat&logo=linkedin&logoColor=white" alt="LinkedIn"/></a>
+  <a href="mailto:enricko.putra028@gmail.com"><img src="https://img.shields.io/badge/Email-EA4335?style=flat&logo=gmail&logoColor=white" alt="Email"/></a>
+  <a href="https://instagram.com/enricko_putra_h"><img src="https://img.shields.io/badge/Instagram-E4405F?style=flat&logo=instagram&logoColor=white" alt="Instagram"/></a>
+  <a href="https://www.youtube.com/@ENRICKOPUTRAHARTONO"><img src="https://img.shields.io/badge/YouTube-FF0000?style=flat&logo=youtube&logoColor=white" alt="YouTube"/></a>
+  <img src="https://komarev.com/ghpvc/?username=Enricko&label=Profile%20views&color=7aa2f7&style=flat" alt="Profile views"/>
+</p>
 
 ---
-## 💰You can help me by Donating
-[![BuyMeACoffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-ffdd00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black)](https://buymeacoffee.com/enrickoputw) 
 
-<!-- Proudly created with GPRM ( https://gprm.itsvg.in ) -->
+### 💫 About me
+
+- 🚢 Currently building **Binav AVTS**, a vessel tracking platform at [Binav](http://binav.co.id)
+- 🎓 Studying at **Universitas Amikom Yogyakarta**
+- 🖥️ I run my own Linux home server and wrote the dashboard that monitors it ([lufria-monitor](https://github.com/Enricko/lufria-monitor))
+- 🌱 Exploring AI and data: PyTorch, data mining and LLM tooling
+- 📈 Outside of code, I'm into trading
+- 💬 Happy to talk about Flutter, Laravel, Go APIs or self-hosting
+
+### 🚀 Featured projects
+
+| Project | What it is | Stack |
+| --- | --- | --- |
+| [lufria-monitor](https://github.com/Enricko/lufria-monitor) | Self-hosted dashboard for a Linux home server: live stats, power use in kWh and Rupiah, passkey sign-in, browser terminal | TypeScript |
+| [mugi-jaya-warehouse](https://github.com/Enricko/mugi-jaya-warehouse) | Warehouse and delivery system with real-time inventory, GPS tracking, photo proof of delivery and approval workflow | Laravel 11, MySQL |
+| [Golang-Template](https://github.com/Enricko/Golang-Template) | Go API starter with built-in CLI tools and the repository pattern | Go |
+| [Flask-Restx-Template](https://github.com/Enricko/Flask-Restx-Template) | Beginner-friendly starter for building REST APIs with Flask-RESTX | Python |
+| [Saba-Jogja](https://github.com/Enricko/Saba-Jogja-Lomba-Web-Dev-Competition-Feb-2024) | App about Yogyakarta's culture and places, built for a competition | Flutter |
+| [Kasir-Warung-Makan](https://github.com/Enricko/Kasir-Warung-Makan) | Point-of-sale app for a small food stall | Flutter |
+
+### 🛠️ Tech stack
+
+**Languages**<br/>
+<img src="https://skillicons.dev/icons?i=dart,go,py,php,ts,js,cs,cpp,rust" alt="Dart, Go, Python, PHP, TypeScript, JavaScript, C#, C++, Rust"/>
+
+**Frameworks**<br/>
+<img src="https://skillicons.dev/icons?i=flutter,laravel,react,nodejs,flask,bootstrap,tailwind,unity" alt="Flutter, Laravel, React, Node.js, Flask, Bootstrap, Tailwind, Unity"/>
+
+**Data, infra and tools**<br/>
+<img src="https://skillicons.dev/icons?i=mysql,sqlite,firebase,aws,docker,linux,cloudflare,git,figma" alt="MySQL, SQLite, Firebase, AWS, Docker, Linux, Cloudflare, Git, Figma"/>
+
+Also: Gin, Flask-RESTX, Socket.IO, JWT
+
+### 📊 GitHub stats
+
+<p align="center">
+  <img height="170" src="https://github-stats-extended.vercel.app/api?username=Enricko&show_icons=true&theme=tokyonight&hide_border=true" alt="GitHub stats"/>
+  <img height="170" src="https://streak-stats.demolab.com/?user=Enricko&theme=tokyonight&hide_border=true" alt="GitHub streak"/>
+</p>
+
+---
+
+<p align="center">
+  If my work helped you, you can support me here<br/><br/>
+  <a href="https://buymeacoffee.com/enrickoputw"><img src="https://img.shields.io/badge/Buy%20me%20a%20coffee-FFDD00?style=for-the-badge&logo=buymeacoffee&logoColor=black" alt="Buy me a coffee"/></a>
+</p>
