@@ -72,20 +72,6 @@ LANGUAGE_COLORS = {
     "CSS": "#663399",
 }
 
-# Curated featured repositories (best of the public work).
-FEATURED = [
-    ("lufria-monitor",
-     "Self-hosted monitoring dashboard: live stats, power in kWh & Rupiah, passkey sign-in"),
-    ("mugi-jaya-warehouse",
-     "Warehouse and delivery system: real-time inventory, GPS tracking, photo proof"),
-    ("Golang-Template",
-     "Go API starter with built-in CLI tools and the repository pattern"),
-    ("Flask-Restx-Template",
-     "Beginner-friendly starter for REST APIs with Flask-RESTX"),
-    ("Saba-Jogja-Lomba-Web-Dev-Competition-Feb-2024",
-     "Guide to Yogyakarta: Javanese script, local food and landmarks"),
-]
-
 # Tile counts — honest numbers from the portfolio's own data files:
 # 8 systems in data/projects.js, 400 days of per-minute server history on
 # lufria-monitor, 5 certifications in the Education section.
@@ -417,278 +403,352 @@ def hero(s: Stats) -> str:
     return svg_doc(body, w, h, style)
 
 
-def tile(which: str, label: str, n: int, unit: str, desc: str, color: str) -> str:
-    w, h = 560, 300
-    style = swing("main", 0.35) + fade("meta", 0.9) + PULSE_CSS
-    ring = "" if STATIC else (
-        f'<circle class="pulsering" cx="520" cy="44" r="26" fill="none" stroke="{color}" '
-        f'stroke-width="1.4"/>'
-    )
-    label_y = 96
-    body = f"""{card_bg(w, h)}
-<g class="main">
-<text x="44" y="{label_y}" font-family="Geist Mono" font-size="20" letter-spacing="6" fill="{color}">{label}</text>
-{count_up(n, 44, 210, "start", 96, color, "Geist Mono")}
-<text x="46" y="240" font-family="Instrument Serif" font-size="24" fill="{TEXT}">{esc(unit)}</text>
-</g>
-<g class="meta">
-<text x="46" y="264" font-size="14.5" fill="{DIM}">{esc(desc)}</text>
-<text x="46" y="282" font-family="Geist Mono" font-size="13" fill="{MUT}">lufria.tech <tspan fill="{color}">→</tspan></text>
-</g>
-{live_dot(520, 44, 5, color)}{ring}"""
-    return svg_doc(body, w, h, style)
+# ------------------------------------------------------------ text metrics ---
+_FONTS_CACHE: dict = {}
 
 
-def activity(s: Stats) -> str:
-    w, h = 1200, 330
-    style = rise("ttl", 0.05) + rise("chip", 0.2)
-    months = s.months
-    best_i = max(range(len(months)), key=lambda i: months[i][1])
-    max_v = max(v for _, v in months) or 1
-    x0, x1 = 120, 1148
-    y_base, y_top = 258, 108
-    bw = (x1 - x0) / len(months) - 26
-    bars = []
-    bars_css = ""
-    labels = []
-    for i, (key, v) in enumerate(months):
-        bx = x0 + i * (x1 - x0) / len(months) + 13
-        bh = max(4, int((y_base - y_top) * v / max_v))
-        color = ACC if i == best_i else SURFACE2
-        stroke = f"{ACC}80" if i == best_i else BORDER
-        if not STATIC:
-            bars_css += grow(f"b{i}", 0.25 + i * 0.06)
-            bars_css += fade(f"b{i}t", 0.85 + i * 0.06, 0.3)
-        label = dt.datetime.strptime(key, "%Y-%m").strftime("%b")
-        if i == best_i:
-            bars.append(
-                f'<rect class="b{i}" x="{bx:.0f}" y="{y_base - bh:.0f}" width="{bw:.0f}" '
-                f'height="{bh}" rx="7" fill="{color}" stroke="{stroke}"/>'
-            )
-            bars.append(
-                f'<text class="b{i}t" x="{bx + bw / 2:.0f}" y="{y_base - bh - 12:.0f}" '
-                f'text-anchor="middle" font-family="Geist Mono" font-size="15" fill="{ACC}">{fmt(v)}</text>'
-            )
-        else:
-            bars.append(
-                f'<rect class="b{i}" x="{bx:.0f}" y="{y_base - bh:.0f}" width="{bw:.0f}" '
-                f'height="{bh}" rx="7" fill="{color}" stroke="{stroke}"/>'
-            )
-            if v >= 100:
-                bars.append(
-                    f'<text class="b{i}t" x="{bx + bw / 2:.0f}" y="{y_base - bh - 10:.0f}" '
-                    f'text-anchor="middle" font-family="Geist Mono" font-size="12" fill="{DIM}">{v}</text>'
-                )
-        labels.append(
-            f'<text x="{bx + bw / 2:.0f}" y="{y_base + 26}" text-anchor="middle" '
-            f'font-family="Geist Mono" font-size="13.5" fill="{DIM}">{label}</text>'
+def text_w(s: str, size: float, face: str = "geist-400") -> float:
+    """Advance width of s in px, from the embedded font's own metrics.
+
+    SVG has no text wrapping, so every line and chip is measured up front;
+    a line that would not fit fails the render instead of spilling out.
+    """
+    if face not in _FONTS_CACHE:
+        from fontTools.ttLib import TTFont
+
+        font = TTFont(FONTS / f"{face}.woff")
+        _FONTS_CACHE[face] = (
+            font.getBestCmap(), font["hmtx"], font["head"].unitsPerEm
         )
-    best_key = months[best_i][0]
-    body = f"""{card_bg(w, h)}
-<text class="ttl" x="72" y="76" font-family="Instrument Serif" font-size="34">Activity</text>
-<text class="ttl" x="72" y="100" font-size="15" fill="{DIM}">contributions per month, last 12 · best month in green</text>
-<text class="chip" x="1128" y="72" text-anchor="end" font-family="Geist Mono" font-size="14" fill="{MUT}">best: <tspan fill="{ACC}">{best_key}</tspan> · {fmt(months[best_i][1])} commits</text>
-<line x1="120" y1="{y_base}" x2="1148" y2="{y_base}" stroke="{BORDER2}"/>
-{''.join(bars)}
-{''.join(labels)}
-<text x="72" y="316" font-family="Geist Mono" font-size="13.5" fill="{DIM}"> total <tspan fill="{TEXT}">{fmt(s.total)}</tspan> · active days <tspan fill="{TEXT}">{fmt(s.active)}</tspan> · current streak <tspan fill="{ACC}">{s.streak}d</tspan></text>"""
-    return svg_doc(body, w, h, style + bars_css)
+    cmap, hmtx, upm = _FONTS_CACHE[face]
+    return sum(hmtx[cmap[ord(c)]][0] for c in s if ord(c) in cmap) * size / upm
 
 
-def terminal(s: Stats) -> str:
-    """The Lufria OS panel: boot log + htop meters, the one terminal card."""
-    w, h = 1200, 380
-    boot = [
-        f"$ boot lufria-os <tspan fill='{MUT}'>— uptime</tspan> <tspan fill='{ACC}'>{COUNTS['operate']}d</tspan> <tspan fill='{MUT}'>of per-minute server history</tspan>",
-        f"$ git --since=1y <tspan fill='{MUT}'>→</tspan> <tspan fill='{ACC}'>{fmt(s.total)}</tspan> contributions <tspan fill='{MUT}'>·</tspan> <tspan fill='{ACC}'>{s.streak}d</tspan> streak <tspan fill='{MUT}'>· peak</tspan> <tspan fill='{ACC}'>{s.peak_day['count']}</tspan> <tspan fill='{MUT}'>on {s.peak_day['date']}</tspan>",
-        f"$ systemctl status fleet <tspan fill='{MUT}'>— docker, nginx, cloudflare tunnel, n8n, mail: all</tspan> <tspan fill='{ACC}'>healthy</tspan>",
-        f"$ agent --list <tspan fill='{MUT}'>— claude · codex · hermes · 9router: workflow</tspan> <tspan fill='{ACC}'>armed</tspan>",
-        f"$ uptime --pretty <tspan fill='{MUT}'>— the WebSocket says hello over the tunnel</tspan> <tspan class='blink' fill='{ACC}'>|</tspan>",
-    ]
-    css = "".join(fade(f"ln{i}", 0.15 + i * 0.28, 0.25) for i in range(len(boot)))
-    lines = "\n".join(
-        f'<text class="ln{i}" x="84" y="{100 + i * 38}" font-family="Geist Mono" '
-        f'font-size="16.5" fill="{TEXT}">{txt}</text>'
-        for i, txt in enumerate(boot)
+def fits(s: str, size: float, max_w: float, face: str = "geist-400") -> str:
+    width = text_w(s, size, face)
+    if width > max_w:
+        raise SystemExit(f"text too wide ({width:.0f} > {max_w:.0f}px): {s!r}")
+    return esc(s)
+
+
+def chip(x: float, y: float, label: str, size: float = 17,
+         dot: str | None = None, cls: str = "") -> tuple[str, float]:
+    """A rounded tag; returns (markup, width). y is the text baseline."""
+    pad, h = 16, size * 2.1
+    dot_w = 16 if dot else 0
+    w = pad * 2 + dot_w + text_w(label, size)
+    out = (
+        f'<g class="{cls}"><rect x="{x:.1f}" y="{y - size * 1.33:.1f}" width="{w:.1f}" '
+        f'height="{h:.1f}" rx="{h / 2:.1f}" fill="{SURFACE}" stroke="{BORDER2}"/>'
+    )
+    if dot:
+        out += f'<circle cx="{x + pad + 4:.1f}" cy="{y - size * 0.33:.1f}" r="4.5" fill="{dot}"/>'
+    out += (
+        f'<text x="{x + pad + dot_w:.1f}" y="{y:.1f}" font-size="{size}" fill="{TEXT}">'
+        f"{esc(label)}</text></g>"
+    )
+    return out, w
+
+
+def heading(title: str, sub: str, w: int) -> str:
+    return (
+        f'<text class="ttl" x="72" y="76" font-family="Instrument Serif" font-size="38">{esc(title)}</text>'
+        f'<text class="ttl" x="72" y="104" font-size="17" fill="{DIM}">{fits(sub, 17, w - 144)}</text>'
     )
 
-    meters = []
-    meters_css = ""
-    rows = [
-        ("ACTIVITY", min(s.active / len(s.days), 1.0), f"{fmt(s.active)} / {fmt(len(s.days))} days"),
-        ("STREAK", min(s.streak / 120, 1.0) if s.streak else 0.02, f"{s.streak}d current best"),
-        (
-            "PEAK",
-            min(s.peak_day["count"] / 40, 1.0) if s.peak_day["count"] else 0.02,
-            f"{s.peak_day['count']} on {s.peak_day['date']}",
-        ),
+
+# --------------------------------------------------------------- highlights ---
+def highlights() -> str:
+    """Build / Operate / Learn in one full-width card.
+
+    These used to be three separate 560px-wide images squeezed to a third of
+    the README, which shrank their captions to ~7px. One full-width card
+    keeps every line at the same scale as the rest of the page.
+    """
+    w, h = 1200, 250
+    cols = [
+        ("BUILD", COUNTS["build"], "systems shipped", "web · mobile · desktop", ACC),
+        ("OPERATE", COUNTS["operate"], "days of server history", "self-hosted, monitored to the kWh", AMB),
+        ("LEARN", COUNTS["learn"], "certificates & competitions", "Amikom Yogyakarta · Informatics", SILVER),
     ]
-    column = (w - 128) / 3
-    for i, (name, frac, note) in enumerate(rows):
-        x = 84 + i * column
-        mw = column - 150
-        if not STATIC:
-            meters_css += grow(f"m{i}", 0.9 + i * 0.15, 1.1, "X")
-        meters.append(
-            f'<text x="{x:.0f}" y="282" font-family="Geist Mono" font-size="13" fill="{DIM}">{name}</text>'
-            f'<rect x="{x:.0f}" y="290" width="{mw:.0f}" height="16" rx="8" fill="{SURFACE2}" stroke="{BORDER}"/>'
-            f'<rect class="m{i}" x="{x + 2:.0f}" y="292" width="{max(6, int((mw - 4) * frac))}" '
-            f'height="12" rx="6" fill="{ACC}"/>'
-            f'<text x="{x:.0f}" y="336" font-family="Geist Mono" font-size="13.5" fill="{MUT}">{esc(note)}</text>'
-        )
-    body = f"""{card_bg(w, h)}
-<text x="84" y="62" font-family="Geist Mono" font-size="13.5" fill="{DIM}">lufria@home-server:~$ watch -n1 lufria-os</text>
-{live_dot(84, 40)}
-{lines}
-{''.join(meters)}"""
-    return svg_doc(body, w, h, css + meters_css + BLINK_CSS)
-
-
-
-def graph(s: Stats) -> str:
-    w, h = 1200, 350
-    days = s.days[-365:]
-    x0, y0, cell, gap = 120, 146, 15, 3.2
-    cols = []
-    for d in days:
-        d = dict(d)
-        d["dow"] = dt.date.fromisoformat(d["date"]).weekday()
-        cols.append(d)
-    grid = [[]]
-    for d in cols:
-        if d["dow"] == 0 and len(grid[-1]):
-            grid.append([])
-        grid[-1].append(d)
-    if grid and grid[0] and grid[0][0]["dow"] != 0:
-        grid[0] = [None] * grid[0][0]["dow"] + grid[0]
-    css = ""
-    rects = []
-    for ci, col in enumerate(grid):
-        if not STATIC:
-            css += fade(f"c{ci}", 0.1 + ci * 0.022, 0.3)
-        for ri, d in enumerate(col):
-            x = x0 + ci * (cell + gap)
-            y = y0 + ri * (cell + gap)
-            if d is None:
-                continue
-            rects.append(
-                f'<rect class="c{ci}" x="{x:.1f}" y="{y:.1f}" width="{cell}" height="{cell}" '
-                f'rx="3.5" fill="{HEAT[d["level"]]}"/>'
+    col_w = (w - 144) / 3
+    parts, css = [], ""
+    for i, (label, n, unit, desc, color) in enumerate(cols):
+        x = 72 + i * col_w + (24 if i else 0)
+        css += rise(f"hc{i}", 0.1 + i * 0.15, 16)
+        if i:
+            parts.append(
+                f'<line x1="{x - 24:.0f}" y1="52" x2="{x - 24:.0f}" y2="206" stroke="{BORDER2}"/>'
             )
-    month_ticks = []
-    last_month = ""
-    last_ci = -99
-    for ci, col in enumerate(grid):
-        for d in col:
-            if d:
-                m = d["date"][:7]
-                if m != last_month:
-                    last_month = m
-                    # Like GitHub: skip a label that would crowd the previous one.
-                    if ci - last_ci < 3:
-                        break
-                    last_ci = ci
-                    label = dt.datetime.strptime(m, "%Y-%m").strftime("%b")
-                    month_ticks.append(
-                        f'<text x="{x0 + ci * (cell + gap):.1f}" y="{y0 - 12}" '
-                        f'font-family="Geist Mono" font-size="12.5" fill="{DIM}">{label}</text>'
-                    )
-                    break
-    body = f"""{card_bg(w, h)}
-<text x="72" y="64" font-family="Instrument Serif" font-size="34">Open source radar</text>
-<text x="72" y="88" font-size="15" fill="{DIM}">contributions, last 52 weeks</text>
-<text x="1128" y="64" text-anchor="end" font-family="Geist Mono" font-size="16" fill="{MUT}"><tspan fill="{ACC}" font-size="22">{fmt(s.total)}</tspan> / yr</text>
-{''.join(month_ticks)}
-{''.join(rects)}
-<text x="72" y="{y0 + 0 * (cell + gap) + 12:.1f}" font-family="Geist Mono" font-size="12.5" fill="{DIM}">Mon</text>
-<text x="72" y="{y0 + 2 * (cell + gap) + 12:.1f}" font-family="Geist Mono" font-size="12.5" fill="{DIM}">Wed</text>
-<text x="72" y="{y0 + 4 * (cell + gap) + 12:.1f}" font-family="Geist Mono" font-size="12.5" fill="{DIM}">Fri</text>
-<g font-family="Geist Mono" font-size="12.5">
-  <text x="{w - 72 - 260}" y="{h - 28}" text-anchor="start" fill="{DIM}">Less</text>
-  {''.join(f'<rect x="{w - 72 - 200 + i * 22}" y="{h - 38}" width="15" height="15" rx="3.5" fill="{HEAT[i]}"/>' for i in range(5))}
-  <text x="{w - 72}" y="{h - 28}" text-anchor="end" fill="{DIM}">More</text>
-</g>"""
-    style = css
-    return svg_doc(body, w, h, style)
-
-
-def repos(s: Stats) -> str:
-    w, h = 1200, 450
-    meta = load_repo_meta()
-    rows_css = ""
-    rows = []
-    short = {
-        "Saba-Jogja-Lomba-Web-Dev-Competition-Feb-2024": "Saba Jogja — competition build",
-    }
-    for i, (name, desc) in enumerate(FEATURED):
-        m = meta.get(name, {})
-        lang = m.get("language") or "—"
-        stars = m.get("stars")
-        color = LANGUAGE_COLORS.get(lang, MUT)
-        y = 150 + i * 62
-        if not STATIC:
-            rows_css += rise(f"r{i}", 0.1 + i * 0.12, 16, 0.7)
-        star_txt = (
-            f'<tspan fill="{AMB}">★ {stars}</tspan>' if stars is not None
-            else f'<tspan fill="{DIM}">—</tspan>'
-        )
-        rows.append(
-            f'<g class="r{i}">'
-            f'<rect x="72" y="{y - 30}" width="{w - 144}" height="52" rx="12" fill="{SURFACE}" stroke="{BORDER}"/>'
-            f'<circle cx="100" cy="{y - 4}" r="5" fill="{color}"/>'
-            f'<text x="120" y="{y + 1}" font-size="17" font-weight="600" fill="{TEXT}">{esc(short.get(name, name))}</text>'
-            f'<text x="120" y="{y + 20}" font-size="13.5" fill="{DIM}">{esc(desc)}</text>'
-            f'<text x="{w - 100}" y="{y + 2}" text-anchor="end" font-family="Geist Mono" '
-            f'font-size="14" fill="{MUT}">{esc(lang)} · {star_txt}</text>'
+        parts.append(
+            f'<g class="hc{i}">'
+            f'<circle cx="{x + 5:.0f}" cy="68" r="5" fill="{color}"/>'
+            f'<text x="{x + 20:.0f}" y="74" font-family="Geist Mono" font-size="16" '
+            f'letter-spacing="4" fill="{color}">{label}</text>'
+            + count_up(n, round(x), 148, "start", 66, color, "Geist Mono", begin=0.5 + i * 0.2)
+            + f'<text x="{x:.0f}" y="184" font-family="Instrument Serif" font-size="27">{fits(unit, 27, col_w - 30, "instrument-400")}</text>'
+            f'<text x="{x:.0f}" y="212" font-size="16" fill="{DIM}">{fits(desc, 16, col_w - 30)}</text>'
             f"</g>"
         )
-    body = f"""{card_bg(w, h)}
-<text x="72" y="72" font-family="Instrument Serif" font-size="34">Pinned work</text>
-<text x="72" y="96" font-size="15" fill="{DIM}">five repos that show the range — live stars from the GitHub API</text>
-{''.join(rows)}"""
-    return svg_doc(body, w, h, rows_css)
+    return svg_doc(card_bg(w, h) + "".join(parts), w, h, css)
+
+
+# ----------------------------------------------------------------- projects ---
+PROJECTS = {
+    "rast": {
+        "title": "RAST",
+        "lines": [
+            "Resource Administration & Storage Toolkit:",
+            "self-hosted server admin with a desktop-like",
+            "web UI and its own package ecosystem.",
+        ],
+        "tags": ["Rust", "Axum", "self-hosted"],
+    },
+    "lufria-monitor": {
+        "title": "lufria-monitor",
+        "lines": [
+            "Monitoring for a Linux home server: live",
+            "stats, power use in kWh and Rupiah, passkey",
+            "sign-in and a terminal in the browser.",
+        ],
+        "tags": ["TypeScript", "Linux", "passkeys"],
+    },
+}
+
+
+def project(name: str, side: str) -> str:
+    """One half of the 'now building' row (shown at 49.5% width each)."""
+    w, h = 600, 340
+    info = PROJECTS[name]
+    meta = load_repo_meta().get(name, {})
+    lang = meta.get("language") or "—"
+    stars = meta.get("stars")
+    # leave a gutter on the inner edge so the two cards don't touch
+    left = 1 if side == "left" else 9
+    right = (w - 9) if side == "left" else (w - 1)
+    x = left + 40
+    inner = right - left - 80
+    css = rise("p0", 0.1) + rise("p1", 0.3) + fade("p2", 0.7)
+    star = (
+        f'<text x="{right - 40}" y="64" text-anchor="end" font-family="Geist Mono" '
+        f'font-size="16" fill="{AMB}">★ {stars}</text>' if stars is not None else ""
+    )
+    lines = "".join(
+        f'<text x="{x}" y="{170 + i * 27}" font-size="18" fill="{MUT}">{fits(t, 18, inner)}</text>'
+        for i, t in enumerate(info["lines"])
+    )
+    tags, tx = [], x
+    for t in info["tags"]:
+        markup, cw = chip(tx, 278, t, 15, LANGUAGE_COLORS.get(t))
+        tags.append(markup)
+        tx += cw + 10
+    motif, motif_css = rast_motif(right - 40) if name == "rast" else pulse_motif(right - 40)
+    body = (
+        f'<rect x="{left}" y="1" width="{right - left}" height="{h - 2}" rx="20" '
+        f'fill="{BG}" stroke="{BORDER}"/>'
+        f'<g class="p0"><circle cx="{x + 5}" cy="58" r="5.5" fill="{LANGUAGE_COLORS.get(lang, MUT)}"/>'
+        f'<text x="{x + 20}" y="64" font-family="Geist Mono" font-size="16" fill="{MUT}">{esc(lang)}</text>'
+        f"{star}"
+        f'<text x="{x}" y="126" font-family="Instrument Serif" font-size="46">{esc(info["title"])}</text></g>'
+        f'<g class="p1">{lines}</g>'
+        f'<g class="p2">{"".join(tags)}'
+        f'<text x="{right - 40}" y="278" text-anchor="end" font-family="Geist Mono" font-size="15" '
+        f'fill="{DIM}">view repo <tspan fill="{ACC}">→</tspan></text></g>'
+        f"{motif}"
+    )
+    return svg_doc(body, w, h, css + motif_css)
+
+
+def rast_motif(rx: float) -> tuple[str, str]:
+    """Three little windows stacking up — RAST's desktop-in-a-browser."""
+    out, css = [], ""
+    for i in range(3):
+        x, y = rx - 150 + i * 22, 86 + i * 14
+        css += rise(f"win{i}", 0.5 + i * 0.18, 12, 0.7)
+        out.append(
+            f'<g class="win{i}"><rect x="{x}" y="{y}" width="106" height="62" rx="8" '
+            f'fill="{SURFACE2}" stroke="{BORDER2}"/>'
+            f'<line x1="{x}" y1="{y + 16}" x2="{x + 106}" y2="{y + 16}" stroke="{BORDER2}"/>'
+            f'<circle cx="{x + 10}" cy="{y + 8}" r="2.6" fill="{["#ff5f57", "#febc2e", ACC][i]}"/></g>'
+        )
+    return "".join(out), css
+
+
+def pulse_motif(rx: float) -> tuple[str, str]:
+    """A heartbeat line that keeps tracing — the server is alive."""
+    css = ""
+    x0, y = rx - 170, 120
+    pts = [(0, 0), (40, 0), (52, -10), (62, 0), (78, 0), (88, 22), (100, -40),
+           (112, 12), (122, 0), (170, 0)]
+    path = " ".join(f"{x0 + px},{y + py}" for px, py in pts)
+    if not STATIC:
+        css = (
+            ".beat{stroke-dasharray:420;animation:beat 2.6s ease-in-out infinite}"
+            "@keyframes beat{0%{stroke-dashoffset:420}55%{stroke-dashoffset:0}"
+            "100%{stroke-dashoffset:-420}}"
+        )
+    return (
+        f'<polyline points="{path}" fill="none" stroke="{ACC}33" stroke-width="3" '
+        f'stroke-linejoin="round"/>'
+        f'<polyline class="beat" points="{path}" fill="none" stroke="{ACC}" stroke-width="3" '
+        f'stroke-linejoin="round" stroke-linecap="round"/>'
+    ), css
+
+
+# -------------------------------------------------------------------- stack ---
+STACK = [
+    ("LANGUAGES", ["Go", "Rust", "TypeScript", "Python", "Dart", "PHP"]),
+    ("FRAMEWORKS", ["Gin", "Axum", "Flutter", "Laravel", "Flask-RESTX", "PyTorch"]),
+    ("INFRA", ["Linux", "Docker", "nginx", "Cloudflare Tunnel", "n8n"]),
+    ("AI WORKFLOW", ["Claude", "Codex", "Hermes"]),
+]
+
+
+def stack() -> str:
+    w = 1200
+    y0, row_h = 166, 60
+    h = y0 + (len(STACK) - 1) * row_h + 46
+    rows, css = [], rise("ttl", 0.05)
+    for r, (label, items) in enumerate(STACK):
+        y = y0 + r * row_h
+        css += fade(f"sr{r}", 0.25 + r * 0.18, 0.5)
+        parts = [
+            f'<text x="72" y="{y}" font-family="Geist Mono" font-size="14" letter-spacing="3" '
+            f'fill="{MUT}">{label}</text>'
+        ]
+        x = 280
+        for item in items:
+            markup, cw = chip(x, y, item, 17, LANGUAGE_COLORS.get(item))
+            parts.append(markup)
+            x += cw + 12
+        if x - 12 > w - 72:
+            raise SystemExit(f"stack row {label} too wide: {x:.0f}")
+        rows.append(f'<g class="sr{r}">{"".join(parts)}</g>')
+    body = card_bg(w, h) + heading(
+        "Stack", "what I reach for, and what keeps the home server running", w
+    ) + "".join(rows)
+    return svg_doc(body, w, h, css)
+
+
+# ----------------------------------------------------------------- activity ---
+def activity(s: Stats) -> str:
+    """Year in numbers (left) and contributions per month (right)."""
+    w, h = 1200, 396
+    months = s.months
+    best_i = max(range(len(months)), key=lambda i: months[i][1])
+    best_key, best_v = months[best_i]
+    best_label = dt.datetime.strptime(best_key, "%Y-%m").strftime("%b %Y")
+    max_v = max(v for _, v in months) or 1
+
+    css = rise("ttl", 0.05)
+    stats = [
+        (s.total, "contributions", ACC),
+        (s.active, "active days", TEXT),
+        (best_v, f"best month · {best_label}", TEXT),
+    ]
+    left = []
+    for j, (n, label, color) in enumerate(stats):
+        y = 176 + j * 82
+        css += fade(f"st{j}", 0.3 + j * 0.15, 0.5)
+        left.append(
+            f'<g class="st{j}">'
+            + count_up(n, 72, y, "start", 40, color, "Geist Mono", begin=0.4 + j * 0.15)
+            + f'<text x="72" y="{y + 26}" font-size="16" fill="{DIM}">{fits(label, 16, 270)}</text></g>'
+        )
+
+    x0, x1 = 390, 1128
+    y_base, y_top = 318, 150
+    slot = (x1 - x0) / len(months)
+    bw = slot - 20
+    bars = []
+    for i, (key, v) in enumerate(months):
+        bx = x0 + i * slot + 10
+        bh = max(4, round((y_base - y_top) * v / max_v))
+        best = i == best_i
+        css += grow(f"b{i}", 0.3 + i * 0.05) + fade(f"bt{i}", 0.8 + i * 0.05, 0.3)
+        bars.append(
+            f'<rect class="b{i}" x="{bx:.0f}" y="{y_base - bh}" width="{bw:.0f}" height="{bh}" '
+            f'rx="6" fill="{ACC if best else "#27272a"}" stroke="{ACC + "80" if best else BORDER2}"/>'
+            f'<text class="bt{i}" x="{bx + bw / 2:.0f}" y="{y_base - bh - 10}" text-anchor="middle" '
+            f'font-family="Geist Mono" font-size="{15 if best else 13}" fill="{ACC if best else MUT}">{fmt(v)}</text>'
+            f'<text x="{bx + bw / 2:.0f}" y="{y_base + 28}" text-anchor="middle" font-family="Geist Mono" '
+            f'font-size="14" fill="{TEXT if best else DIM}">'
+            f'{dt.datetime.strptime(key, "%Y-%m").strftime("%b")}</text>'
+        )
+    body = (
+        card_bg(w, h)
+        + heading("Activity", "GitHub contributions over the last 12 months", w)
+        + "".join(left)
+        + f'<line x1="{x0}" y1="{y_base}" x2="{x1}" y2="{y_base}" stroke="{BORDER2}"/>'
+        + "".join(bars)
+    )
+    return svg_doc(body, w, h, css)
 
 
 # ------------------------------------------------------------------ readme ---
-def readme(rev: str) -> str:
-    def img(name: str, alt: str, width: str = "100%") -> str:
-        return f'<img src="./cards/{name}.svg?v={rev}" alt="{alt}" width="{width}"/>'
-
-    html = f"""<p align="center">
-  <a href="https://lufria.tech">{img("hero", "Enricko Putra Hartono (Lufria) — Software Engineer, with a terminal cat as an old friend")}</a>
-</p>
-
-<p align="center">
-  <a href="https://lufria.tech#projects">{img("build", "Build — 8 systems shipped", "32.5%")}</a><a href="https://github.com/Enricko/lufria-monitor">{img("operate", "Operate — 400 days of server history", "32.5%")}</a><a href="https://lufria.tech#education">{img("learn", "Learn — 5 certificates and competitions", "32.5%")}</a>
-</p>
-
-<p align="center">
-  {img("activity", "Contributions per month, last 12 months")}
-</p>
-
-<p align="center">
-  {img("terminal", "A warm htop terminal panel usually reserved for uptime: total contributions, streak and fleet boot log")}
-</p>
-
-<p align="center">
-  {img("graph", "Contribution graph of the last year, in Lufria green")}
-</p>
-
-<p align="center">
-  {img("repos", "Pinned repositories with live star counts")}
-</p>
-
-<p align="center">
+FOOTER = """<p align="center">
   <b>Enricko Putra Hartono</b> · <a href="https://lufria.tech">lufria.tech</a> ·
-  <a href="https://github.com/Enricko">GitHub</a> ·
   <a href="https://www.linkedin.com/in/enricko-putra-hartono-744646233/">LinkedIn</a> ·
   <a href="https://instagram.com/enricko_putra_h">Instagram</a> ·
   <a href="https://www.youtube.com/@ENRICKOPUTRAHARTONO">YouTube</a> ·
   <a href="mailto:enricko.putra028@gmail.com">Email</a> ·
   <a href="https://saweria.co/Lufria">Saweria</a>
+</p>"""
+
+
+def readme(rev: str) -> str:
+    """The README body. GitHub already renders pinned repos and the
+    contribution calendar right under it, so the cards don't repeat them."""
+
+    def img(name: str, alt: str, width: str = "100%") -> str:
+        return f'<img src="./cards/{name}.svg?v={rev}" alt="{alt}" width="{width}"/>'
+
+    return f"""<p align="center">
+  <a href="https://lufria.tech">{img("hero", "Enricko Putra Hartono (Lufria), Software Engineer, with a terminal cat as an old friend")}</a>
 </p>
+
+<p align="center">
+  <a href="https://lufria.tech">{img("highlights", f"Build: {COUNTS['build']} systems shipped. Operate: {COUNTS['operate']} days of server history. Learn: {COUNTS['learn']} certificates and competitions")}</a>
+</p>
+
+<p align="center">
+  <a href="https://github.com/Enricko/rast">{img("project-rast", "RAST: self-hosted server administration with a desktop-like web UI, in Rust and Axum", "49.5%")}</a><a href="https://github.com/Enricko/lufria-monitor">{img("project-monitor", "lufria-monitor: monitoring dashboard for a Linux home server", "49.5%")}</a>
+</p>
+
+<p align="center">
+  {img("stack", "Stack: Go, Rust, TypeScript, Python, Dart, PHP; Gin, Axum, Flutter, Laravel, Flask-RESTX, PyTorch; Linux, Docker, nginx, Cloudflare Tunnel, n8n; Claude, Codex, Hermes")}
+</p>
+
+<p align="center">
+  {img("activity", "GitHub contributions per month over the last 12 months")}
+</p>
+
+{FOOTER}
 """
-    return html
+
+
+PREVIEW = """<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Profile README preview</title>
+<style>
+  /* Mimics the GitHub profile page around the README. Generated by
+     render_readme_cards.py from the same markup as README.md. */
+  body {{ margin: 0; background: #0d1117; color: #e6edf3;
+    font-family: -apple-system, "Segoe UI", system-ui, sans-serif; }}
+  .readme {{ width: 880px; max-width: 92vw; margin: 28px auto 60px;
+    border: 1px solid #30363d; border-radius: 6px; padding: 24px; box-sizing: border-box; }}
+  .readme p {{ margin: 0 0 16px; text-align: center; font-size: 14px; }}
+  .readme img {{ vertical-align: middle; }}
+  a {{ color: #4493f8; text-decoration: none; }}
+</style>
+</head>
+<body><div class="readme">
+{body}
+</div></body>
+</html>
+"""
 
 
 # --------------------------------------------------------------------- main ---
@@ -713,23 +773,20 @@ def main() -> None:
     stats = Stats(load_days())
     cards = {
         "hero": hero(stats),
-        "build": tile("build", "BUILD", COUNTS["build"], "systems shipped",
-                      "web · mobile · desktop, across freelance and production", ACC),
-        "operate": tile("operate", "OPERATE", COUNTS["operate"], "days of server history",
-                        "self-hosted, monitored to the kWh — lufria-monitor", AMB),
-        "learn": tile("learn", "LEARN", COUNTS["learn"], "certificates & competitions",
-                      "Universitas Amikom Yogyakarta · S1 Informatika", SILVER),
+        "highlights": highlights(),
+        "project-rast": project("rast", "left"),
+        "project-monitor": project("lufria-monitor", "right"),
+        "stack": stack(),
         "activity": activity(stats),
-        "terminal": terminal(stats),
-        "graph": graph(stats),
-        "repos": repos(stats),
     }
     for name, doc in cards.items():
         p = CARDS / f"{name}.svg"
         p.write_text(doc)
         print(f"cards/{name}.svg — {p.stat().st_size / 1024:.0f} KB")
 
-    (ROOT / "README.md").write_text(readme(args.rev))
+    body = readme(args.rev)
+    (ROOT / "README.md").write_text(body)
+    (ROOT / "preview.html").write_text(PREVIEW.format(body=body.replace("./cards/", "cards/")))
     print(f"README.md — rev {args.rev}")
 
 
