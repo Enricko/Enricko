@@ -1,0 +1,46 @@
+name: Render README cards
+
+# Redraws the profile README cards every night (00:00 WIB) with fresh
+# contribution and repo data, and commits whatever changed back to main.
+on:
+  schedule:
+    - cron: "17 17 * * *" # 17:17 UTC daily = 00:17 WIB
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: render-cards
+  cancel-in-progress: true
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install fonttools
+        run: pip install fonttools
+
+      - name: Render cards + README
+        run: |
+          python scripts/render_readme_cards.py --refresh --rev "${GITHUB_SHA::7}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Commit if anything changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "Nothing changed; skipping commit."
+          else
+            git commit -m "chore: refresh README cards [skip ci]"
+            git push
+          fi
