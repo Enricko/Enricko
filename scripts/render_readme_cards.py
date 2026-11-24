@@ -351,7 +351,7 @@ class Stats:
 
 # ------------------------------------------------------------------- cards ---
 def hero(s: Stats) -> str:
-    w, h = 1200, 430
+    w, h = 1200, 452
     cat = [
         r"        /\____/\        ",
         r"       /  o  o  \       ",
@@ -372,9 +372,9 @@ def hero(s: Stats) -> str:
     )
     pill = (
         f'<g class="hpill">'
-        f'<rect x="72" y="342" width="378" height="44" rx="22" fill="#4ade8014" stroke="{ACC}66"/>'
-        + live_dot(100, 364)
-        + f'<text x="118" y="369" font-size="17" fill="{ACC}">'
+        f'<rect x="72" y="362" width="378" height="44" rx="22" fill="#4ade8014" stroke="{ACC}66"/>'
+        + live_dot(100, 384)
+        + f'<text x="118" y="389" font-size="17" fill="{ACC}">'
         "Available for Web, Mobile &amp; Desktop engineering</text>"
         "</g>"
     )
@@ -382,7 +382,7 @@ def hero(s: Stats) -> str:
     # Terminal window with the cat — "cat" as a pun, printing in row by row.
     tx, ty, tw, th = 790, 78, 340, 250
     cat_lines = "\n".join(
-        f'<text class="cat{i}" x="{tx + 36}" y="{ty + 72 + i * 22}" font-family="Geist Mono" '
+        f'<text class="cat{i}" x="{tx + 36}" y="{ty + 72 + i * 22}" font-family="Geist Mono" xml:space="preserve" '
         f'font-size="17" fill="{ACC}">{esc(line)}</text>'
         for i, line in enumerate(cat)
     )
@@ -399,7 +399,7 @@ def hero(s: Stats) -> str:
         + cat_lines
         + f'<text class="cat-cmd2" x="{tx + 36}" y="{ty + 224}" font-family="Geist Mono" '
         f'font-size="15" fill="{MUT}"># output: friendly</text>'
-        f'<rect class="blink" x="{tx + 172}" y="{ty + 210}" width="9" height="17" fill="{ACC}"/>'
+        f'<rect class="blink" x="{tx + 204}" y="{ty + 210}" width="9" height="17" fill="{ACC}"/>'
         f"</g>"
     )
     if not STATIC:
@@ -409,9 +409,10 @@ def hero(s: Stats) -> str:
 <text class="h1a" x="72" y="150" font-family="Instrument Serif" font-size="84" letter-spacing="-1">Enricko Putra</text>
 """ + shine("Hartono", 72, 236, cls="h1b") + f"""
 <text class="hrole" x="74" y="286" font-size="24" fill="{MUT}">Software Engineer · a.k.a. <tspan font-family="Instrument Serif" font-style="italic" fill="{ACC}" font-size="27">Lufria</tspan></text>
-<text class="hlead" x="74" y="318" font-size="16.5" fill="{DIM}">High-performance systems across web, desktop &amp; mobile — agentic AI workflow, self-hosted infrastructure.</text>
+<g class="hlead"><text x="74" y="318" font-size="16.5" fill="{DIM}">High-performance systems across web, desktop &amp; mobile —</text>
+<text x="74" y="340" font-size="16.5" fill="{DIM}">agentic AI workflow, self-hosted infrastructure.</text></g>
 {pill}
-<text class="hmeta" x="72" y="406" font-family="Geist Mono" font-size="14.5" fill="{DIM}">Yogyakarta, Indonesia · open to remote · <tspan fill="{ACC}">lufria.tech</tspan></text>
+<text class="hmeta" x="72" y="428" font-family="Geist Mono" font-size="14.5" fill="{DIM}">Yogyakarta, Indonesia · open to remote · <tspan fill="{ACC}">lufria.tech</tspan></text>
 {term}"""
     return svg_doc(body, w, h, style)
 
@@ -545,9 +546,9 @@ def terminal(s: Stats) -> str:
 
 
 def graph(s: Stats) -> str:
-    w, h = 1200, 320
+    w, h = 1200, 350
     days = s.days[-365:]
-    x0, y0, cell, gap = 120, 84, 15, 3.2
+    x0, y0, cell, gap = 120, 146, 15, 3.2
     cols = []
     for d in days:
         d = dict(d)
@@ -576,12 +577,17 @@ def graph(s: Stats) -> str:
             )
     month_ticks = []
     last_month = ""
+    last_ci = -99
     for ci, col in enumerate(grid):
         for d in col:
             if d:
                 m = d["date"][:7]
                 if m != last_month:
                     last_month = m
+                    # Like GitHub: skip a label that would crowd the previous one.
+                    if ci - last_ci < 3:
+                        break
+                    last_ci = ci
                     label = dt.datetime.strptime(m, "%Y-%m").strftime("%b")
                     month_ticks.append(
                         f'<text x="{x0 + ci * (cell + gap):.1f}" y="{y0 - 12}" '
@@ -594,9 +600,9 @@ def graph(s: Stats) -> str:
 <text x="1128" y="64" text-anchor="end" font-family="Geist Mono" font-size="16" fill="{MUT}"><tspan fill="{ACC}" font-size="22">{fmt(s.total)}</tspan> / yr</text>
 {''.join(month_ticks)}
 {''.join(rects)}
-<text x="72" y="176" font-family="Geist Mono" font-size="12.5" fill="{DIM}">Mon</text>
-<text x="72" y="{y0 + 3 * (cell + gap) + 4:.1f}" font-family="Geist Mono" font-size="12.5" fill="{DIM}">Wed</text>
-<text x="72" y="{y0 + 5 * (cell + gap) + 4:.1f}" font-family="Geist Mono" font-size="12.5" fill="{DIM}">Fri</text>
+<text x="72" y="{y0 + 0 * (cell + gap) + 12:.1f}" font-family="Geist Mono" font-size="12.5" fill="{DIM}">Mon</text>
+<text x="72" y="{y0 + 2 * (cell + gap) + 12:.1f}" font-family="Geist Mono" font-size="12.5" fill="{DIM}">Wed</text>
+<text x="72" y="{y0 + 4 * (cell + gap) + 12:.1f}" font-family="Geist Mono" font-size="12.5" fill="{DIM}">Fri</text>
 <g font-family="Geist Mono" font-size="12.5">
   <text x="{w - 72 - 260}" y="{h - 28}" text-anchor="start" fill="{DIM}">Less</text>
   {''.join(f'<rect x="{w - 72 - 200 + i * 22}" y="{h - 38}" width="15" height="15" rx="3.5" fill="{HEAT[i]}"/>' for i in range(5))}
@@ -607,7 +613,7 @@ def graph(s: Stats) -> str:
 
 
 def repos(s: Stats) -> str:
-    w, h = 1200, 420
+    w, h = 1200, 450
     meta = load_repo_meta()
     rows_css = ""
     rows = []
@@ -619,7 +625,7 @@ def repos(s: Stats) -> str:
         lang = m.get("language") or "—"
         stars = m.get("stars")
         color = LANGUAGE_COLORS.get(lang, MUT)
-        y = 118 + i * 62
+        y = 150 + i * 62
         if not STATIC:
             rows_css += rise(f"r{i}", 0.1 + i * 0.12, 16, 0.7)
         star_txt = (
