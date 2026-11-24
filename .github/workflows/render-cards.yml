@@ -1,7 +1,12 @@
 name: Render README cards
 
-# Redraws the profile README cards every night (00:00 WIB) with fresh
-# contribution and repo data, and commits whatever changed back to main.
+# Redraws the snapshot cards in cards/ every night (00:17 WIB) with fresh
+# contribution, repo and server data, and commits whatever changed.
+#
+# With the repository variable LIVE_BASE set (Settings > Secrets and
+# variables > Actions > Variables), README.md points the cards that change at
+# the live card server instead, and these snapshots are only the fallback:
+# delete the variable and run this workflow to switch back to them.
 on:
   schedule:
     - cron: "17 17 * * *" # 17:17 UTC daily = 00:17 WIB
@@ -24,14 +29,15 @@ jobs:
         with:
           python-version: "3.13"
 
-      - name: Install fonttools
-        run: pip install fonttools
+      - name: Install dependencies
+        run: pip install -r requirements.txt
 
       - name: Render cards + README
         run: |
           python scripts/render_readme_cards.py --refresh --rev "${GITHUB_SHA::7}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          LIVE_BASE: ${{ vars.LIVE_BASE }}
 
       - name: Commit if anything changed
         run: |

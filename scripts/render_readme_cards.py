@@ -8,16 +8,24 @@ embedded as base64 WOFF data URIs (subset in fonts/ by prepare_fonts.py),
 because an SVG shown through README <img> tags cannot load stylesheets or
 request external assets — but it can run its own CSS keyframes and SMIL.
 
-One script renders everything, the same script runs in the daily GitHub
-Action, and STATIC=1 renders the final frame of every animation so the
-layout can be screenshotted and audited with nothing moving.
+The card functions take their data as arguments, so the same code draws
+the committed snapshot cards (this script, run nightly by a GitHub Action)
+and the live ones (server/cards.py, which draws a card on every request).
+STATIC=1 renders the final frame of every animation so the layout can be
+screenshotted and audited with nothing moving.
 
 Usage:
     python scripts/render_readme_cards.py [--refresh] [--static] [--rev REV]
 
-    --refresh   fetch fresh contribution + repo data first
+    --refresh   fetch fresh contribution, repo and server data first
     --static    render the final frame only (no animations)
     --rev REV   cache-bust query appended to image URLs in README.md
+
+Environment:
+    LIVE_BASE     e.g. https://cards.lufria.tech: README.md then points the
+                  cards that change at the live server instead of cards/
+    MONITOR_URL   lufria-monitor's public profile endpoint
+    GITHUB_TOKEN  optional; same-day contribution counts via GraphQL
 """
 
 from __future__ import annotations
@@ -40,6 +48,9 @@ FONTS = ROOT / "fonts"
 USERNAME = "Enricko"
 CONTRIB_URL = f"https://github-contributions-api.jogruber.de/v4/{USERNAME}?y=last"
 REPOS_API = f"https://api.github.com/users/{USERNAME}/repos?per_page=100&sort=pushed"
+GRAPHQL_API = "https://api.github.com/graphql"
+MONITOR_URL = os.environ.get("MONITOR_URL", "https://monitor.lufria.tech/api/public/profile")
+WIB = dt.timezone(dt.timedelta(hours=7), "WIB")
 
 # ---------------------------------------------------------------- palette ---
 # Straight from lufria.tech's design tokens (Profile/src/index.css :root).
@@ -72,9 +83,9 @@ LANGUAGE_COLORS = {
     "CSS": "#663399",
 }
 
-# Tile counts — honest numbers from the portfolio's own data files:
-# 8 systems in data/projects.js, 400 days of per-minute server history on
-# lufria-monitor, 5 certifications in the Education section.
+# Tile counts from the portfolio's own data files: 8 systems in
+# data/projects.js, 5 certifications in the Education section. "operate" is
+# only a fallback: the live count is lufria-monitor's days of history.
 COUNTS = {"build": 8, "operate": 400, "learn": 5}
 
 STATIC = False
@@ -260,38 +271,85 @@ BLINK_CSS = (
 
 
 # -------------------------------------------------------------------- data ---
-def fetch_json(url: str, optional_token: bool = True) -> dict | list | None:
+def fetch_json(url: str, body: dict | None = None, timeout: float = 30) -> dict | list | None:
     headers = {"Accept": "application/json", "User-Agent": "profile-readme-cards"}
     token = os.environ.get("GITHUB_TOKEN")
     if token and "api.github.com" in url:
         headers["Authorization"] = f"Bearer {token}"
-    req = urllib.request.Request(url, headers=headers)
+    data = None
+    if body is not None:
+        data = json.dumps(body).encode()
+        headers["Content-Type"] = "application/json"
+    req = urllib.request.Request(url, data=data, headers=headers)
     try:
-        with urllib.request.urlopen(req, timeout=30) as res:
+        with urllib.request.urlopen(req, timeout=timeout) as res:
             return json.loads(res.read().decode())
-    except Exception as err:  # noqa: BLE001 — offline/fallback keeps cards renderable
+    except Exception as err:  # noqa: BLE001 — callers fall back to the last good data
         print(f"warn: fetch failed ({url}): {err}", file=sys.stderr)
         return None
 
 
-def refresh_data() -> None:
-    DATA.mkdir(exist_ok=True)
+LEVELS = {"NONE": 0, "FIRST_QUARTILE": 1, "SECOND_QUARTILE": 2, "THIRD_QUARTILE": 3, "FOURTH_QUARTILE": 4}
+
+
+def fetch_days() -> list[dict] | None:
+    """The last year of daily contributions.
+
+    With a token, GitHub's own GraphQL calendar (up to the minute). Without
+    one, the public jogruber mirror, which can lag by a few hours.
+    """
+    if os.environ.get("GITHUB_TOKEN"):
+        query = (
+            "query($login:String!){user(login:$login){contributionsCollection{"
+            "contributionCalendar{weeks{contributionDays{date contributionCount contributionLevel}}}}}}"
+        )
+        res = fetch_json(GRAPHQL_API, {"query": query, "variables": {"login": USERNAME}})
+        try:
+            weeks = res["data"]["user"]["contributionsCollection"]["contributionCalendar"]["weeks"]
+            return [
+                {"date": d["date"], "count": d["contributionCount"],
+                 "level": LEVELS.get(d["contributionLevel"], 0)}
+                for w in weeks for d in w["contributionDays"]
+            ]
+        except (TypeError, KeyError):
+            print("warn: GraphQL contributions unavailable, using the public mirror", file=sys.stderr)
     data = fetch_json(CONTRIB_URL)
     if data and isinstance(data.get("contributions"), list):
-        data["fetchedAt"] = dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds")
-        data["username"] = USERNAME
-        (DATA / "contributions.json").write_text(json.dumps(data, separators=(",", ":")))
+        return data["contributions"]
+    return None
+
+
+def fetch_repo_meta() -> dict | None:
     repos = fetch_json(REPOS_API)
-    if repos and isinstance(repos, list):
-        slim = [
-            {
-                "name": r.get("name"),
-                "stars": r.get("stargazers_count", 0),
-                "language": r.get("language"),
-            }
-            for r in repos
-        ]
-        (DATA / "repos.json").write_text(json.dumps(slim, separators=(",", ":")))
+    if not isinstance(repos, list):
+        return None
+    return {
+        r.get("name"): {"name": r.get("name"), "stars": r.get("stargazers_count", 0),
+                        "language": r.get("language")}
+        for r in repos
+    }
+
+
+def fetch_server() -> dict | None:
+    """lufria-monitor's public numbers, or None when the server can't be reached."""
+    data = fetch_json(MONITOR_URL, timeout=4)
+    return data if isinstance(data, dict) and data.get("online") else None
+
+
+def refresh_data() -> None:
+    DATA.mkdir(exist_ok=True)
+    days = fetch_days()
+    if days:
+        (DATA / "contributions.json").write_text(json.dumps(
+            {"username": USERNAME, "contributions": days,
+             "fetchedAt": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds")},
+            separators=(",", ":")))
+    meta = fetch_repo_meta()
+    if meta:
+        (DATA / "repos.json").write_text(json.dumps(list(meta.values()), separators=(",", ":")))
+    server = fetch_server()
+    if server:
+        (DATA / "server.json").write_text(json.dumps(server, separators=(",", ":")))
 
 
 def load_days() -> list[dict]:
@@ -304,11 +362,14 @@ def load_days() -> list[dict]:
 
 def load_repo_meta() -> dict:
     path = DATA / "repos.json"
-    if not path.exists():
-        refresh_data()
     if path.exists():
         return {r["name"]: r for r in json.loads(path.read_text())}
     return {}
+
+
+def load_server() -> dict | None:
+    path = DATA / "server.json"
+    return json.loads(path.read_text()) if path.exists() else None
 
 
 class Stats:
@@ -336,7 +397,7 @@ class Stats:
 
 
 # ------------------------------------------------------------------- cards ---
-def hero(s: Stats) -> str:
+def hero() -> str:
     w, h = 1200, 452
     cat = [
         r"        /\____/\        ",
@@ -458,7 +519,7 @@ def heading(title: str, sub: str, w: int) -> str:
 
 
 # --------------------------------------------------------------- highlights ---
-def highlights() -> str:
+def highlights(operate_days: int | None = None) -> str:
     """Build / Operate / Learn in one full-width card.
 
     These used to be three separate 560px-wide images squeezed to a third of
@@ -468,7 +529,7 @@ def highlights() -> str:
     w, h = 1200, 250
     cols = [
         ("BUILD", COUNTS["build"], "systems shipped", "web · mobile · desktop", ACC),
-        ("OPERATE", COUNTS["operate"], "days of server history", "self-hosted, monitored to the kWh", AMB),
+        ("OPERATE", operate_days or COUNTS["operate"], "days of server history", "self-hosted, monitored to the kWh", AMB),
         ("LEARN", COUNTS["learn"], "certificates & competitions", "Amikom Yogyakarta · Informatics", SILVER),
     ]
     col_w = (w - 144) / 3
@@ -516,11 +577,11 @@ PROJECTS = {
 }
 
 
-def project(name: str, side: str) -> str:
+def project(name: str, side: str, repo_meta: dict) -> str:
     """One half of the 'now building' row (shown at 49.5% width each)."""
     w, h = 600, 340
     info = PROJECTS[name]
-    meta = load_repo_meta().get(name, {})
+    meta = repo_meta.get(name, {})
     lang = meta.get("language") or "—"
     stars = meta.get("stars")
     # leave a gutter on the inner edge so the two cards don't touch
@@ -685,6 +746,86 @@ def activity(s: Stats) -> str:
     return svg_doc(body, w, h, css)
 
 
+# ------------------------------------------------------------------- server ---
+def _uptime(seconds: int | None) -> str:
+    if not seconds:
+        return "—"
+    days, rest = divmod(int(seconds), 86400)
+    return f"{days}d {rest // 3600}h" if days else f"{rest // 3600}h {rest % 3600 // 60}m"
+
+
+def _num(value, fmt_: str = "{:.0f}", unit: str = "") -> str:
+    return "—" if value is None else fmt_.format(value) + unit
+
+
+def server(live: dict | None, live_mode: bool = True) -> str:
+    """The home server right now, from lufria-monitor's public endpoint.
+
+    Drawn on every request by the live server, so the watts, CPU and cost
+    are whatever the box reported in the last ten seconds. When the box
+    can't be reached the card says so instead of showing stale numbers.
+    """
+    w, h = 1200, 340
+    online = bool(live)
+    when = dt.datetime.fromtimestamp(live["ts"], WIB) if online and live.get("ts") else None
+    if not online and live_mode:
+        status = "offline right now: the box is resting or the tunnel is down"
+    elif not online:
+        status = "no snapshot: the server couldn't be reached when this card was drawn"
+    elif live_mode:
+        status = f"lufria-monitor · as of {when:%H:%M:%S} WIB, refreshed on every view"
+    else:
+        status = f"lufria-monitor · snapshot from {when:%d %b, %H:%M} WIB"
+    css = rise("ttl", 0.05) + PULSE_CSS
+    body = card_bg(w, h) + heading("Live from the home server", status, w)
+    if not online:
+        body += (
+            f'{live_dot(84, 152, 7, "#f87171")}'
+            f'<text x="106" y="160" font-family="Geist Mono" font-size="22" fill="#f87171">offline</text>'
+            f'<text x="72" y="214" font-size="18" fill="{MUT}">{fits("Old gaming laptop turned server · Docker, nginx, Cloudflare Tunnel, n8n", 18, w - 144)}</text>'
+            f'<text x="72" y="244" font-size="18" fill="{DIM}">{fits("The numbers come back on their own as soon as it does.", 18, w - 144)}</text>'
+        )
+        return svg_doc(body, w, h, css)
+
+    watts = live.get("watts")
+    shown = fmt(round(watts)) if watts is not None else "—"
+    big = (
+        count_up(round(watts), 72, 236, "start", 84, ACC, "Geist Mono", begin=0.3)
+        if watts is not None else
+        f'<text x="72" y="236" font-family="Geist Mono" font-size="84" fill="{ACC}">—</text>'
+    )
+    unit_x = 72 + text_w(shown, 84, "geistmono-400") + 12
+    cells = [
+        ("CPU", _num(live.get("cpu_percent"), "{:.0f}", "%"), "load right now"),
+        ("TEMP", _num(live.get("cpu_temp"), "{:.0f}", "°C"), "CPU package"),
+        ("MEMORY", _num(live.get("mem_percent"), "{:.0f}", "%"), "in use"),
+        ("UPTIME", _uptime(live.get("uptime_s")), "since last boot"),
+        ("TODAY", _num(live.get("kwh_today"), "{:.2f}", " kWh"), f"Rp {fmt(live.get('cost_today') or 0)}"),
+        ("THIS MONTH", _num(live.get("kwh_month"), "{:.1f}", " kWh"), f"Rp {fmt(live.get('cost_month') or 0)}"),
+    ]
+    x0 = 470
+    col_w = (w - 72 - x0) / 3
+    grid = []
+    for i, (label, value, sub) in enumerate(cells):
+        x = x0 + (i % 3) * col_w
+        y = 158 + (i // 3) * 92
+        css += fade(f"g{i}", 0.4 + i * 0.08, 0.5)
+        grid.append(
+            f'<g class="g{i}">'
+            f'<text x="{x:.0f}" y="{y}" font-family="Geist Mono" font-size="13" letter-spacing="3" fill="{DIM}">{label}</text>'
+            f'<text x="{x:.0f}" y="{y + 34}" font-family="Geist Mono" font-size="28" fill="{TEXT}">{fits(value, 28, col_w - 16, "geistmono-400")}</text>'
+            f'<text x="{x:.0f}" y="{y + 58}" font-size="15" fill="{DIM}">{fits(sub, 15, col_w - 16)}</text></g>'
+        )
+    body += (
+        f'<line x1="{x0 - 40}" y1="132" x2="{x0 - 40}" y2="300" stroke="{BORDER2}"/>'
+        + big
+        + f'<text x="{unit_x:.0f}" y="236" font-family="Geist Mono" font-size="30" fill="{MUT}">W</text>'
+        + f'{live_dot(80, 284, 5)}<text x="96" y="290" font-size="16" fill="{DIM}">drawing from the wall now</text>'
+        + "".join(grid)
+    )
+    return svg_doc(body, w, h, css)
+
+
 # ------------------------------------------------------------------ readme ---
 FOOTER = """<p align="center">
   <b>Enricko Putra Hartono</b> · <a href="https://lufria.tech">lufria.tech</a> ·
@@ -696,19 +837,37 @@ FOOTER = """<p align="center">
 </p>"""
 
 
-def readme(rev: str) -> str:
+# Cards whose numbers change. With LIVE_BASE set, the README loads these from
+# the live server (drawn per request); the rest never change between renders.
+LIVE_CARDS = {"highlights", "project-rast", "project-monitor", "server", "activity"}
+
+
+def readme(rev: str, live_base: str = "", has_server: bool = True) -> str:
     """The README body. GitHub already renders pinned repos and the
-    contribution calendar right under it, so the cards don't repeat them."""
+    contribution calendar right under it, so the cards don't repeat them.
+
+    The server card is left out of a snapshot README that has no server data
+    yet (lufria-monitor's public endpoint off or unreachable)."""
 
     def img(name: str, alt: str, width: str = "100%") -> str:
-        return f'<img src="./cards/{name}.svg?v={rev}" alt="{alt}" width="{width}"/>'
+        if live_base and name in LIVE_CARDS:
+            src = f"{live_base.rstrip('/')}/live/{name}.svg"
+        else:
+            src = f"./cards/{name}.svg?v={rev}"
+        return f'<img src="{src}" alt="{alt}" width="{width}"/>'
+
+    server_card = f"""<p align="center">
+  <a href="https://github.com/Enricko/lufria-monitor">{img("server", "Live from the home server: power draw, CPU, temperature, uptime and electricity cost, from lufria-monitor")}</a>
+</p>
+
+""" if live_base or has_server else ""
 
     return f"""<p align="center">
   <a href="https://lufria.tech">{img("hero", "Enricko Putra Hartono (Lufria), Software Engineer, with a terminal cat as an old friend")}</a>
 </p>
 
 <p align="center">
-  <a href="https://lufria.tech">{img("highlights", f"Build: {COUNTS['build']} systems shipped. Operate: {COUNTS['operate']} days of server history. Learn: {COUNTS['learn']} certificates and competitions")}</a>
+  <a href="https://lufria.tech">{img("highlights", f"Build: {COUNTS['build']} systems shipped. Operate: days of server history. Learn: {COUNTS['learn']} certificates and competitions")}</a>
 </p>
 
 <p align="center">
@@ -719,7 +878,7 @@ def readme(rev: str) -> str:
   {img("stack", "Stack: Go, Rust, TypeScript, Python, Dart, PHP; Gin, Axum, Flutter, Laravel, Flask-RESTX, PyTorch; Linux, Docker, nginx, Cloudflare Tunnel, n8n; Claude, Codex, Hermes")}
 </p>
 
-<p align="center">
+{server_card}<p align="center">
   {img("activity", "GitHub contributions per month over the last 12 months")}
 </p>
 
@@ -752,6 +911,29 @@ PREVIEW = """<!doctype html>
 
 
 # --------------------------------------------------------------------- main ---
+CARD_NAMES = ("hero", "highlights", "project-rast", "project-monitor", "stack", "server", "activity")
+
+
+def draw(name: str, days: list[dict], repo_meta: dict, live: dict | None,
+         live_mode: bool = True) -> str:
+    """Draw one card from the data it needs. Shared by main() and server/cards.py."""
+    if name == "hero":
+        return hero()
+    if name == "highlights":
+        return highlights((live or {}).get("history_days"))
+    if name == "project-rast":
+        return project("rast", "left", repo_meta)
+    if name == "project-monitor":
+        return project("lufria-monitor", "right", repo_meta)
+    if name == "stack":
+        return stack()
+    if name == "server":
+        return server(live, live_mode)
+    if name == "activity":
+        return activity(Stats(days))
+    raise KeyError(name)
+
+
 def main() -> None:
     global STATIC
     ap = argparse.ArgumentParser(description=__doc__)
@@ -770,21 +952,14 @@ def main() -> None:
         refresh_data()
 
     CARDS.mkdir(exist_ok=True)
-    stats = Stats(load_days())
-    cards = {
-        "hero": hero(stats),
-        "highlights": highlights(),
-        "project-rast": project("rast", "left"),
-        "project-monitor": project("lufria-monitor", "right"),
-        "stack": stack(),
-        "activity": activity(stats),
-    }
+    live, days, meta = load_server(), load_days(), load_repo_meta()
+    cards = {name: draw(name, days, meta, live, live_mode=False) for name in CARD_NAMES}
     for name, doc in cards.items():
         p = CARDS / f"{name}.svg"
         p.write_text(doc)
         print(f"cards/{name}.svg — {p.stat().st_size / 1024:.0f} KB")
 
-    body = readme(args.rev)
+    body = readme(args.rev, os.environ.get("LIVE_BASE", ""), has_server=live is not None)
     (ROOT / "README.md").write_text(body)
     (ROOT / "preview.html").write_text(PREVIEW.format(body=body.replace("./cards/", "cards/")))
     print(f"README.md — rev {args.rev}")

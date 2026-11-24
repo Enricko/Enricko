@@ -1,0 +1,11 @@
+{
+  "functions": {
+    "api/cards.py": {
+      "includeFiles": "{scripts,server,fonts,data}/**",
+      "maxDuration": 15
+    }
+  },
+  "rewrites": [
+    { "source": "/live/:file", "destination": "/api/cards?file=:file" }
+  ]
+}

@@ -23,10 +23,10 @@ from fontTools import ttLib
 ROOT = Path(__file__).resolve().parent.parent
 FONTS = ROOT / "fonts"
 
-# Printable ASCII plus the punctuation the cards use: middle dot, hyphens/dashes,
+# Printable ASCII plus the punctuation the cards use: degree sign, middle dot, hyphens/dashes,
 # arrows, bullet, ellipsis, circle, star.
 UNICODES = (
-    "U+0020-007E,U+00B7,U+2013,U+2014,U+2190-2193,"
+    "U+0020-007E,U+00B0,U+00B7,U+2013,U+2014,U+2190-2193,"
     "U+2022,U+2026,U+25CF,U+2605"
 )
 
