@@ -1,21 +1,21 @@
 <p align="center">
-  <a href="https://lufria.tech"><img src="./cards/hero.svg?v=39159cd" alt="Enricko Putra Hartono (Lufria), Software Engineer, with a terminal cat as an old friend" width="100%"/></a>
+  <a href="https://lufria.tech"><img src="./cards/hero.svg?v=eeee7a8" alt="Enricko Putra Hartono (Lufria), Software Engineer, with a terminal cat as an old friend" width="100%"/></a>
 </p>
 
 <p align="center">
-  <a href="https://lufria.tech"><img src="./cards/highlights.svg?v=39159cd" alt="Build: 8 systems shipped. Operate: days of server history. Learn: 5 certificates and competitions" width="100%"/></a>
+  <a href="https://lufria.tech"><img src="./cards/highlights.svg?v=eeee7a8" alt="Build: 8 systems shipped. Operate: days of server history. Learn: 5 certificates and competitions" width="100%"/></a>
 </p>
 
 <p align="center">
-  <a href="https://github.com/Enricko/rast"><img src="./cards/project-rast.svg?v=39159cd" alt="RAST: self-hosted server administration with a desktop-like web UI, in Rust and Axum" width="49.5%"/></a><a href="https://github.com/Enricko/lufria-monitor"><img src="./cards/project-monitor.svg?v=39159cd" alt="lufria-monitor: monitoring dashboard for a Linux home server" width="49.5%"/></a>
+  <a href="https://github.com/Enricko/rast"><img src="./cards/project-rast.svg?v=eeee7a8" alt="RAST: self-hosted server administration with a desktop-like web UI, in Rust and Axum" width="49.5%"/></a><a href="https://github.com/Enricko/lufria-monitor"><img src="./cards/project-monitor.svg?v=eeee7a8" alt="lufria-monitor: monitoring dashboard for a Linux home server" width="49.5%"/></a>
 </p>
 
 <p align="center">
-  <img src="./cards/stack.svg?v=39159cd" alt="Stack: Go, Rust, TypeScript, Python, Dart, PHP; Gin, Axum, Flutter, Laravel, Flask-RESTX, PyTorch; Linux, Docker, nginx, Cloudflare Tunnel, n8n; Claude, Codex, Hermes" width="100%"/>
+  <img src="./cards/stack.svg?v=eeee7a8" alt="Stack: Go, Rust, TypeScript, Python, Dart, PHP; Gin, Axum, Flutter, Laravel, Flask-RESTX, PyTorch; Linux, Docker, nginx, Cloudflare Tunnel, n8n; Claude, Codex, Hermes" width="100%"/>
 </p>
 
 <p align="center">
-  <img src="./cards/activity.svg?v=39159cd" alt="GitHub contributions per month over the last 12 months" width="100%"/>
+  <img src="./cards/activity.svg?v=eeee7a8" alt="GitHub contributions per month over the last 12 months" width="100%"/>
 </p>
 
 <p align="center">
